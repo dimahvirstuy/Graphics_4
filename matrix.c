@@ -49,6 +49,12 @@ angle of rotation and X as the axis of rotation.
 ====================*/
 struct matrix * make_rotX(double theta) {
   matrix * res = new_matrix(4, 4);
+  res->m[0][0] = 1;
+  res->m[3][3] = 1;
+  res->m[1][1] = cosf(theta);
+  res->m[2][2] = cosf(theta);
+  res->m[2][1] = sinf(theta);
+  res->m[1][2] = -sinf(theta);
   return res;
 }
 
@@ -60,6 +66,12 @@ angle of rotation and Y as the axis of rotation.
 ====================*/
 struct matrix * make_rotY(double theta) {
   matrix * res = new_matrix(4, 4);
+  res->m[0][0] = cosf(theta);
+  res->m[3][3] = 1;
+  res->m[2][0] = -sinf(theta);
+  res->m[0][2] = sinf(theta);
+  res->m[1][1] = 1;
+  res->m[2][2] = cosf(theta);
   return res;
 }
 
