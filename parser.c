@@ -65,10 +65,84 @@ void parse_file ( char * filename,
     f = stdin;
   else
     f = fopen(filename, "r");
-  
+  struct matrix * temp;
   while ( fgets(line, 255, f) != NULL ) {
-    line[strlen(line)-1]='\0';
+    if (line[strlen(line)-1]=='\n') line[strlen(line)-1]='\0';
     printf(":%s:\n",line);
+    if (strcmp(line, "line") == 0) {
+      fgets(line, 255, f);
+      if (line[strlen(line)-1]=='\n') line[strlen(line)-1]='\0';
+      double x0; double y0; double z0; double x1; double y1; double z1;
+      sscanf(line, "%lf %lf %lf %lf %lf %lf", &x0, &y0, &z0, &x1, &y1, &z1);
+      add_edge(edges,x0, y0, z0, x1, y1, z1);
+    }
+    else if (strcmp(line, "ident") == 0) {
+      ident(transform);
+    }
+    else if (strcmp(line, "scale") == 0) {
+      fgets(line, 255, f);
+      if (line[strlen(line)-1]=='\n') line[strlen(line)-1]='\0';
+      double x; double y; double z;
+      sscanf(line, "%lf %lf %lf", &x, &y, &z);
+      temp = make_scale(x,y,z);
+      matrix_mult(temp,transform);
+      free_matrix(temp);
+    }
+    else if (strcmp(line, "move") == 0) {
+      fgets(line, 255, f);
+      if (line[strlen(line)-1]=='\n') line[strlen(line)-1]='\0';
+      double x; double y; double z;
+      sscanf(line, "%lf %lf %lf", &x, &y, &z);
+      temp=make_translate(x,y,z);
+      matrix_mult(temp,transform);
+      free_matrix(temp);
+    }
+    else if (strcmp(line, "rotate") == 0) {
+      fgets(line, 255, f);
+      if (line[strlen(line)-1]=='\n') line[strlen(line)-1]='\0';
+      char axis[2]; double theta;
+      sscanf(line, "%s %lf", axis, &theta);
+      theta = theta * (M_PI / 180);
+      if (axis[0] == 'x'){
+	temp = make_rotX(theta);
+      }
+      if (axis[0] == 'y'){
+	temp = make_rotY(theta);
+      }
+      if (axis[0] == 'z'){
+	temp = make_rotZ(theta);
+      }
+      matrix_mult(temp,transform);
+      free_matrix(temp);
+    }
+    else if (strcmp(line, "apply") == 0) {
+      matrix_mult(transform, edges);
+    }
+    else if (strcmp(line, "display") == 0) {
+      clear_screen(s);
+      color c;
+      c.green=255;
+      c.red=0;
+      c.blue=0;
+      draw_lines(edges,s,c);
+      display(s);
+    }
+    else if (strcmp(line, "save") == 0) {
+      fgets(line,255,f);
+      if (line[strlen(line)-1]=='\n') line[strlen(line)-1]='\0';
+      color c;
+      c.green=255;
+      c.red=0;
+      c.blue=0;
+      draw_lines(edges,s,c);
+      save_extension(s,line);  
+    }
+    else if(strcmp(line, "quit") == 0) {
+      exit(0);
+    }
+    else {
+      printf("invalid input");
+    }
   }
 }
   
